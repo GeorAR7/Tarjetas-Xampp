@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro — Generador de Tarjetas</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+            padding: 40px;
+            width: 100%;
+            max-width: 480px;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .card-header h1 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            margin-bottom: 6px;
+        }
+
+        .card-header p {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 7px;
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            transition: border-color 0.25s, box-shadow 0.25s;
+            outline: none;
+            font-family: inherit;
+        }
+
+        input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.12);
+        }
+
+        input.ok    { border-color: #2ecc71; }
+        input.error { border-color: #e74c3c; }
+
+        .hint {
+            font-size: 0.78rem;
+            margin-top: 5px;
+            min-height: 18px;
+            transition: color 0.2s;
+        }
+        .hint.ok    { color: #27ae60; }
+        .hint.error { color: #e74c3c; }
+        .hint.info  { color: #7f8c8d; }
+
+        /* Barra fuerza contraseña */
+        .pwd-bar-wrap {
+            height: 5px;
+            background: #eee;
+            border-radius: 4px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        .pwd-bar {
+            height: 100%;
+            width: 0%;
+            border-radius: 4px;
+            transition: width 0.3s, background 0.3s;
+        }
+
+        /* Checklist contraseña */
+        .pwd-checks {
+            list-style: none;
+            margin-top: 8px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3px 10px;
+        }
+        .pwd-checks li {
+            font-size: 0.76rem;
+            color: #aaa;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: color 0.2s;
+        }
+        .pwd-checks li.ok { color: #27ae60; }
+        .pwd-checks li::before { content: '○'; font-size: 0.7rem; }
+        .pwd-checks li.ok::before { content: '●'; }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(to right, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+            margin-top: 10px;
+            font-family: inherit;
+        }
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(52,152,219,0.35);
+        }
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .footer-link {
+            text-align: center;
+            margin-top: 22px;
+            font-size: 0.88rem;
+            color: #7f8c8d;
+        }
+        .footer-link a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .footer-link a:hover { text-decoration: underline; }
+
+        /* Alerta éxito */
+        .success-banner {
+            display: none;
+            background: #eafaf1;
+            border: 1px solid #2ecc71;
+            border-radius: 10px;
+            padding: 14px 18px;
+            color: #1e8449;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="card-header">
+        <h1>📋 Crear cuenta</h1>
+        <p>Regístrate para usar el Generador de Tarjetas</p>
+    </div>
+
+    <div class="success-banner" id="successBanner">
+        ✅ ¡Registro exitoso! Redirigiendo al login...
+    </div>
+
+    <form id="regForm" novalidate>
+
+        <!-- EMAIL -->
+        <div class="form-group">
+            <label for="email">Correo electrónico</label>
+            <input type="email" id="email" placeholder="usuario@buap.mx" autocomplete="email">
+            <p class="hint info" id="emailHint">Debe terminar en @buap.mx</p>
+        </div>
+
+        <!-- EDAD -->
+        <div class="form-group">
+            <label for="edad">Edad</label>
+            <input type="number" id="edad" placeholder="Ej: 20" min="0" max="120">
+            <p class="hint info" id="edadHint">Entre 0 y 120 años</p>
+        </div>
+
+        <!-- USUARIO -->
+        <div class="form-group">
+            <label for="usuario">Nombre de usuario</label>
+            <input type="text" id="usuario" placeholder="Ej: jperez" autocomplete="username">
+            <p class="hint info" id="usuarioHint">Sin espacios; no puede ser un nombre reservado</p>
+        </div>
+
+        <!-- CONTRASEÑA -->
+        <div class="form-group">
+            <label for="password">Contraseña</label>
+            <input type="password" id="password" placeholder="Mínimo 8 caracteres" autocomplete="new-password">
+            <div class="pwd-bar-wrap"><div class="pwd-bar" id="pwdBar"></div></div>
+            <ul class="pwd-checks">
+                <li id="chkMay">Una mayúscula</li>
+                <li id="chkMin">Una minúscula</li>
+                <li id="chkNum">Un número</li>
+                <li id="chkEsp">Carácter especial</li>
+                <li id="chkLen">Mínimo 8 caracteres</li>
+            </ul>
+            <p class="hint" id="pwdHint"></p>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn">Registrarme</button>
+    </form>
+
+    <p class="footer-link">¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a></p>
+</div>
+
+<script>
+// ── Configuración ─────────────────────────────────────────────
+const NOMBRES_PROHIBIDOS = ['admin', 'root', 'superuser', 'usuario', 'test',
+                            'guest', 'invitado', 'anonymous', 'null', 'undefined'];
+
+// Verificación de usuario duplicado — ahora se hace en el servidor (registrar.php)
+
+// ── Referencias ───────────────────────────────────────────────
+const emailEl    = document.getElementById('email');
+const edadEl     = document.getElementById('edad');
+const usuarioEl  = document.getElementById('usuario');
+const passwordEl = document.getElementById('password');
+
+const emailHint   = document.getElementById('emailHint');
+const edadHint    = document.getElementById('edadHint');
+const usuarioHint = document.getElementById('usuarioHint');
+const pwdHint     = document.getElementById('pwdHint');
+const pwdBar      = document.getElementById('pwdBar');
+
+const checks = {
+    may: document.getElementById('chkMay'),
+    min: document.getElementById('chkMin'),
+    num: document.getElementById('chkNum'),
+    esp: document.getElementById('chkEsp'),
+    len: document.getElementById('chkLen'),
+};
+
+// ── Validadores ───────────────────────────────────────────────
+
+function setEstado(input, hint, ok, msg) {
+    input.className = ok ? 'ok' : 'error';
+    hint.className  = 'hint ' + (ok ? 'ok' : 'error');
+    hint.textContent = msg;
+    return ok;
+}
+
+function validarEmail() {
+    const v = emailEl.value.trim();
+    if (!v) return setEstado(emailEl, emailHint, false, 'El correo es obligatorio');
+    if (!v.toLowerCase().endsWith('@buap.mx'))
+        return setEstado(emailEl, emailHint, false, 'Debe terminar en @buap.mx');
+    // Validación básica de formato
+    const re = /^[^\s@]+@buap\.mx$/i;
+    if (!re.test(v))
+        return setEstado(emailEl, emailHint, false, 'Formato de correo inválido');
+    return setEstado(emailEl, emailHint, true, '✔ Correo válido');
+}
+
+function validarEdad() {
+    const v = parseInt(edadEl.value, 10);
+    if (edadEl.value === '') return setEstado(edadEl, edadHint, false, 'La edad es obligatoria');
+    if (isNaN(v) || v < 0 || v > 120)
+        return setEstado(edadEl, edadHint, false, 'Debe estar entre 0 y 120 años');
+    return setEstado(edadEl, edadHint, true, '✔ Edad válida');
+}
+
+function validarUsuario() {
+    const v = usuarioEl.value.trim().toLowerCase();
+    if (!v) return setEstado(usuarioEl, usuarioHint, false, 'El usuario es obligatorio');
+    if (/\s/.test(v))
+        return setEstado(usuarioEl, usuarioHint, false, 'No puede contener espacios');
+    if (NOMBRES_PROHIBIDOS.includes(v))
+        return setEstado(usuarioEl, usuarioHint, false, `"${v}" es un nombre reservado`);
+    return setEstado(usuarioEl, usuarioHint, true, '✔ Usuario disponible');
+}
+
+function validarPassword() {
+    const v = passwordEl.value;
+    const tieneMay = /[A-Z]/.test(v);
+    const tieneMin = /[a-z]/.test(v);
+    const tieneNum = /[0-9]/.test(v);
+    const tieneEsp = /[^A-Za-z0-9]/.test(v);
+    const tieneLen = v.length >= 8;
+
+    // Actualizar checklist
+    checks.may.className = tieneMay ? 'ok' : '';
+    checks.min.className = tieneMin ? 'ok' : '';
+    checks.num.className = tieneNum ? 'ok' : '';
+    checks.esp.className = tieneEsp ? 'ok' : '';
+    checks.len.className = tieneLen ? 'ok' : '';
+
+    // Barra de fuerza
+    const cumplidos = [tieneMay, tieneMin, tieneNum, tieneEsp, tieneLen].filter(Boolean).length;
+    const colores = ['#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#27ae60'];
+    pwdBar.style.width      = (cumplidos * 20) + '%';
+    pwdBar.style.background = colores[cumplidos - 1] || '#eee';
+
+    const todoOk = tieneMay && tieneMin && tieneNum && tieneEsp && tieneLen;
+    if (!v) return setEstado(passwordEl, pwdHint, false, 'La contraseña es obligatoria');
+    if (!todoOk) return setEstado(passwordEl, pwdHint, false, 'La contraseña no cumple todos los requisitos');
+    return setEstado(passwordEl, pwdHint, true, '✔ Contraseña segura');
+}
+
+// ── Eventos en tiempo real ────────────────────────────────────
+emailEl.addEventListener('input', validarEmail);
+edadEl.addEventListener('input', validarEdad);
+usuarioEl.addEventListener('input', validarUsuario);
+passwordEl.addEventListener('input', validarPassword);
+
+// ── Submit ────────────────────────────────────────────────────
+document.getElementById('regForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const okEmail    = validarEmail();
+    const okEdad     = validarEdad();
+    const okUsuario  = validarUsuario();
+    const okPassword = validarPassword();
+
+    if (!okEmail || !okEdad || !okUsuario || !okPassword) return;
+
+    // Deshabilitar botón mientras se procesa
+    const btn = document.querySelector('.btn-submit');
+    btn.disabled = true;
+    btn.textContent = 'Registrando...';
+
+    const params = new URLSearchParams();
+    params.append('email',    emailEl.value.trim());
+    params.append('edad',     edadEl.value);
+    params.append('usuario',  usuarioEl.value.trim());
+    params.append('password', passwordEl.value);
+
+    fetch('registrar.php', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body:    params.toString()
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.ok) {
+            document.getElementById('regForm').reset();
+            [emailEl, edadEl, usuarioEl, passwordEl].forEach(el => el.className = '');
+            [emailHint, edadHint, usuarioHint, pwdHint].forEach(h => { h.className = 'hint info'; h.textContent = ''; });
+            pwdBar.style.width = '0%';
+            Object.values(checks).forEach(c => c.className = '');
+
+            document.getElementById('successBanner').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            setTimeout(() => { window.location.href = 'login.html'; }, 2000);
+        } else {
+            btn.disabled = false;
+            btn.textContent = 'Registrarme';
+            if (data.error === 'usuario_duplicado') {
+                setEstado(usuarioEl, usuarioHint, false, 'Ese usuario ya está registrado');
+            } else if (data.error === 'email_duplicado') {
+                setEstado(emailEl, emailHint, false, 'Ese correo ya está registrado');
+            } else {
+                alert('Error al registrar: ' + data.error);
+            }
+        }
+    })
+    .catch(() => {
+        btn.disabled = false;
+        btn.textContent = 'Registrarme';
+        alert('Error de conexión con el servidor');
+    });
+});
+</script>
+
+</body>
+</html>

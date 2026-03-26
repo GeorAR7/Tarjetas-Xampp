@@ -9,7 +9,11 @@
  
 <body> 
     <div class="container"> 
-        <header> 
+        <header>
+            <div id="sessionBar" style="text-align:right; margin-bottom:10px; font-size:0.88rem; color:#7f8c8d;">
+                Hola, <strong id="nombreUsuario"></strong> &nbsp;|&nbsp;
+                <a href="#" onclick="cerrarSesion()" style="color:#e74c3c; font-weight:600; text-decoration:none;">Cerrar sesión</a>
+            </div> 
             <h1> Generador de Tarjetas Interactivo</h1> 
             <p class="subtitle">Crea tarjetas personalizadas usando JavaScript y DOM</p> 
         </header> 
